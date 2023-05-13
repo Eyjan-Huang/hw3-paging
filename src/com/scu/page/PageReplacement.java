@@ -3,7 +3,7 @@ package com.scu.page;
 import java.util.ArrayList;
 
 public class PageReplacement {
-    abstract class PageReplacementAlgorithm {
+    static abstract class PageReplacementAlgorithm {
         String name;
         int faults = 0, hits = 0;
         ArrayList<Integer> memory = new ArrayList<>();
@@ -23,7 +23,7 @@ public class PageReplacement {
         }
     }
 
-    class FIFO extends PageReplacementAlgorithm {
+    static class FIFO extends PageReplacementAlgorithm {
         public FIFO () {
             this.name = "FIFO";
         }
@@ -34,7 +34,7 @@ public class PageReplacement {
         }
     }
 
-    class LRU extends PageReplacementAlgorithm {
+    static class LRU extends PageReplacementAlgorithm {
         public LRU () {
             this.name = "LRU";
         }
@@ -45,7 +45,7 @@ public class PageReplacement {
         }
     }
 
-    class Optimal extends PageReplacementAlgorithm {
+    static class Optimal extends PageReplacementAlgorithm {
         public Optimal () {
             this.name = "Optimal";
         }
@@ -56,7 +56,7 @@ public class PageReplacement {
         }
     }
 
-    class RandomPick extends PageReplacementAlgorithm {
+    static class RandomPick extends PageReplacementAlgorithm {
         public RandomPick () {
             this.name = "RandomPick";
         }
