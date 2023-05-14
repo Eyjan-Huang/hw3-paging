@@ -2,6 +2,7 @@ package com.scu.page;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class PageReplacement {
     static abstract class PageReplacementAlgorithm {
@@ -10,7 +11,7 @@ public class PageReplacement {
         ArrayList<HashMap<Thread, Process>> memory = new ArrayList<>();
         final int SIZE = 25;
 
-        abstract void run ();
+        abstract void run(LinkedList<Process> queue);
 
         public boolean inMemory(Process p) {
             return memory.contains(p);
@@ -30,7 +31,7 @@ public class PageReplacement {
         }
 
         @Override
-        void run() {
+        void run(LinkedList<Process> queue) {
 
         }
     }
@@ -41,7 +42,7 @@ public class PageReplacement {
         }
 
         @Override
-        void run() {
+        void run(LinkedList<Process> queue) {
 
         }
     }
@@ -52,7 +53,7 @@ public class PageReplacement {
         }
 
         @Override
-        void run() {
+        void run(LinkedList<Process> queue) {
 
         }
     }
@@ -63,7 +64,7 @@ public class PageReplacement {
         }
 
         @Override
-        void run() {
+        void run(LinkedList<Process> queue) {
 
         }
     }
