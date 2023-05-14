@@ -17,14 +17,15 @@ public class Init {
 //        queue.stream().forEach(System.out::println);
 
         PageReplacementAlgorithm[] algorithmsPool = new PageReplacementAlgorithm[] {
-                new FIFO(), new LRU(), new Optimal(), new RandomPick()
+                new FIFO(deepCopy(processQueue)),
+                new LRU(deepCopy(processQueue)),
+                new Optimal(deepCopy(processQueue)),
+                new RandomPick(deepCopy(processQueue))
         };
 
-        // Execute each algorithm for 1 mins
+        // Execute each algorithm for 1 min
         for(PageReplacementAlgorithm algorithm : algorithmsPool) {
-            // Deep copy the original queue for each algorithm execution
-            LinkedList<Process> queue = deepCopy(processQueue);
-            System.out.println(queue);
+            System.out.println(algorithm);
         }
 
 
