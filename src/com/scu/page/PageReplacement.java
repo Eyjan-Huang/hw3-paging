@@ -1,12 +1,13 @@
 package com.scu.page;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class PageReplacement {
     static abstract class PageReplacementAlgorithm {
         String name;
         int faults = 0, hits = 0;
-        ArrayList<Integer> memory = new ArrayList<>();
+        ArrayList<HashMap<Thread, Process>> memory = new ArrayList<>();
         final int SIZE = 25;
 
         abstract void run ();
