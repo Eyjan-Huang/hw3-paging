@@ -21,7 +21,7 @@ public class Init {
         };
 
         // Execute each algorithm for 1 mins
-        for(PageReplacementAlgorithm p : algorithmsPool) {
+        for(PageReplacementAlgorithm algorithm : algorithmsPool) {
             // Deep copy the original queue for each algorithm execution
             LinkedList<Process> queue = deepCopy(processQueue);
             System.out.println(queue);
