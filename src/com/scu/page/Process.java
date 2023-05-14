@@ -8,8 +8,8 @@ public class Process {
     private int size;
     private long time;
     private int duration;
-    private ArrayList<Integer> pages;
-    private ArrayList<Integer> frame;
+    private ArrayList<Integer> pages;   // All possible poges on the disk
+    private ArrayList<Integer> frame;   // Size = 4, the piece of memory
 
     public Process(int id) {
         Random rand = new Random();
