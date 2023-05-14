@@ -1,9 +1,11 @@
 package com.scu.page;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 
 public class Process {
+    private Random rand;
     private int id = 0;
     private int size;
     private long time;
@@ -12,7 +14,7 @@ public class Process {
     private ArrayList<Integer> frame;   // Size = 4, the piece of memory
 
     public Process(int id) {
-        Random rand = new Random();
+        rand = new Random();
         int[] sizePool = {5, 11, 17, 31};
         int randIdx = rand.nextInt(sizePool.length);
 
@@ -26,6 +28,41 @@ public class Process {
         for (int i = 0; i < size; i++) {
             pages.add(i);
         }
+    }
+
+    public int locate(int idx) {
+        System.out.println("Current is idx: " + idx);
+        int probability = rand.nextInt(10) + 1;
+        int nextIdx = -1;
+
+        if (probability <= 7) {
+            int[] nextPool = {-1, 0, 1};
+
+            while(nextIdx < 0 || nextIdx > size - 1) {
+                nextIdx = idx + nextPool[rand.nextInt(nextPool.length)];
+                System.out.println("70%" + nextIdx);
+            }
+        } else {
+            if (idx == 0) {
+                System.out.println("30% and idx is 0");
+                return rand.nextInt(size - 2) + 2;
+            } else if (idx == size - 1) {
+                System.out.println("30% and idx is size - 1");
+                return rand.nextInt(size - 2);
+            } else {
+                ArrayList<Integer> candidateBuffer = new ArrayList<>();
+                for (int i = 0; i < size; i++) {
+                    if (i == idx - 1 || i == idx || i == idx + 1) {
+                        continue;
+                    } else {
+                        candidateBuffer.add(i);
+                    }
+                }
+                System.out.println("30% and idx is normal case");
+                return candidateBuffer.get(rand.nextInt(candidateBuffer.size()));
+            }
+        }
+        return nextIdx;
     }
 
     @Override
