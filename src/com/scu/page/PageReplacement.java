@@ -7,7 +7,7 @@ public class PageReplacement {
         String name;
         int faults = 0, hits = 0;
         Queue<Process> queue;
-        LinkedHashMap<Thread, Process> memory = new ArrayList<>();
+        LinkedHashMap<Thread, Process> memory = new LinkedHashMap<>();
         final int SIZE = 25;
 
         public PageReplacementAlgorithm(LinkedList<Process> queue) {
