@@ -9,9 +9,9 @@ public class Process {
     private int id = 0;
     private int size;
     private long time;
-    private int duration;
+    public int duration;
     private ArrayList<Integer> pages;   // All possible pages on the disk
-    private ArrayList<Integer> frame;   // Size = 4, the piece of memory
+    public ArrayList<Integer> frame;   // Size = 4, the piece of memory
 
     public Process(int id) {
         rand = new Random();
