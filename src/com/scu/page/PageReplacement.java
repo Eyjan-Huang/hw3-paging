@@ -7,15 +7,15 @@ public class PageReplacement {
         String name;
         int faults = 0, hits = 0;
         ArrayList<Integer> memory = new ArrayList<>();
-        int size = 100;
+        final int SIZE = 25;
 
         abstract void run ();
 
-        public boolean inMemory (int item) {
-            return memory.contains(item);
+        public boolean inMemory(Process p) {
+            return memory.contains(p);
         }
 
-        public String toString () {
+        public String toString() {
             return String.format(
                     "%s:\nHits: %d\tFaults: %d",
                     name, hits, faults
@@ -24,7 +24,7 @@ public class PageReplacement {
     }
 
     static class FIFO extends PageReplacementAlgorithm {
-        public FIFO () {
+        public FIFO() {
             this.name = "FIFO";
         }
 
@@ -35,7 +35,7 @@ public class PageReplacement {
     }
 
     static class LRU extends PageReplacementAlgorithm {
-        public LRU () {
+        public LRU() {
             this.name = "LRU";
         }
 
@@ -46,7 +46,7 @@ public class PageReplacement {
     }
 
     static class Optimal extends PageReplacementAlgorithm {
-        public Optimal () {
+        public Optimal() {
             this.name = "Optimal";
         }
 
@@ -57,7 +57,7 @@ public class PageReplacement {
     }
 
     static class RandomPick extends PageReplacementAlgorithm {
-        public RandomPick () {
+        public RandomPick() {
             this.name = "RandomPick";
         }
 

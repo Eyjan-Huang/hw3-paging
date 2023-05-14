@@ -1,5 +1,6 @@
 package com.scu.page;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 public class Process {
@@ -7,6 +8,7 @@ public class Process {
     private int size;
     private long time;
     private int duration;
+    private ArrayList<Integer> frame;
 
     public Process () {
         Random rand = new Random();
@@ -15,8 +17,13 @@ public class Process {
 
         ID++;
         this.size = sizePool[randIdx];
+        this.frame = new ArrayList<>();
         this.time = System.currentTimeMillis();
         this.duration = rand.nextInt(5) + 1;
+
+        for (int i = 0; i < size; i++) {
+            frame.add(i);
+        }
     }
 
     @Override
