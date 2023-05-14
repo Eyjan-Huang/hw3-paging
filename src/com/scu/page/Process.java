@@ -8,7 +8,7 @@ public class Process {
     private int size;
     private long time;
     private int duration;
-    private ArrayList<Integer> pages;   // All possible poges on the disk
+    private ArrayList<Integer> pages;   // All possible pages on the disk
     private ArrayList<Integer> frame;   // Size = 4, the piece of memory
 
     public Process(int id) {
@@ -18,6 +18,7 @@ public class Process {
 
         this.id = id;
         this.size = sizePool[randIdx];
+        this.pages = new ArrayList<>();
         this.frame = new ArrayList<>();
         this.time = System.currentTimeMillis();
         this.duration = rand.nextInt(5) + 1;
