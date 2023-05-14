@@ -1,16 +1,13 @@
 package com.scu.page;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Queue;
+import java.util.*;
 
 public class PageReplacement {
     static abstract class PageReplacementAlgorithm implements Runnable{
         String name;
         int faults = 0, hits = 0;
         Queue<Process> queue;
-        ArrayList<HashMap<Thread, Process>> memory = new ArrayList<>();
+        LinkedHashMap<Thread, Process> memory = new ArrayList<>();
         final int SIZE = 25;
 
         public PageReplacementAlgorithm(LinkedList<Process> queue) {
