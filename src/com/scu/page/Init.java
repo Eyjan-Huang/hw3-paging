@@ -14,7 +14,7 @@ public class Init {
         for(int i = 0; i < numOfProcess; i++) {
             processQueue.offer(new Process(i));
         }
-//        queue.stream().forEach(System.out::println);
+        processQueue.stream().forEach(System.out::println);
 
         PageReplacementAlgorithm[] algorithmsPool = new PageReplacementAlgorithm[] {
                 new FIFO(deepCopy(processQueue)),
