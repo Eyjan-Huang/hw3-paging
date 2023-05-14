@@ -4,18 +4,18 @@ import java.util.ArrayList;
 import java.util.Random;
 
 public class Process {
-    private static int ID = 0;
+    private int id = 0;
     private int size;
     private long time;
     private int duration;
     private ArrayList<Integer> frame;
 
-    public Process () {
+    public Process(int id) {
         Random rand = new Random();
         int[] sizePool = {5, 11, 17, 31};
         int randIdx = rand.nextInt(sizePool.length);
 
-        ID++;
+        this.id = id;
         this.size = sizePool[randIdx];
         this.frame = new ArrayList<>();
         this.time = System.currentTimeMillis();
@@ -27,10 +27,10 @@ public class Process {
     }
 
     @Override
-    public String toString () {
+    public String toString() {
         return String.format(
                 "PID: %d, Size: %d, Arrival Time: %d, Duration: %d",
-                ID, size, time, duration
+                id, size, time, duration
         );
     }
 }
