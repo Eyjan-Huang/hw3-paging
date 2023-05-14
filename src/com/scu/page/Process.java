@@ -8,6 +8,7 @@ public class Process {
     private int size;
     private long time;
     private int duration;
+    private ArrayList<Integer> pages;
     private ArrayList<Integer> frame;
 
     public Process(int id) {
@@ -22,7 +23,7 @@ public class Process {
         this.duration = rand.nextInt(5) + 1;
 
         for (int i = 0; i < size; i++) {
-            frame.add(i);
+            pages.add(i);
         }
     }
 
