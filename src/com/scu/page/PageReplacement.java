@@ -14,6 +14,12 @@ public class PageReplacement {
             this.queue = queue;
         }
 
+        public Process fetchProcess() {
+            synchronized (queue) {
+                return (! queue.isEmpty()) ? queue.poll() : null;
+            }
+        }
+
         public String toString() {
             return String.format(
                     "%s:\nHits: %d\tFaults: %d, %s",
@@ -31,37 +37,36 @@ public class PageReplacement {
         @Override
         public void run() {
             while (!queue.isEmpty()) {
-                Process currentProcess;
-                synchronized (queue) {
-                    currentProcess = (! queue.isEmpty()) ? queue.poll() : null;
+                Process currentProcess = fetchProcess();
+
+                if (currentProcess == null) {
+                    break;
                 }
 
-                if (currentProcess != null) {
-                    memory.put(Thread.currentThread(), currentProcess);
-                    ArrayList<Integer> currentFrame = currentProcess.frame;
-                    int limit = (int) (currentProcess.duration / 0.1);
-                    int accessPage = 0;
+                memory.put(Thread.currentThread(), currentProcess);
+                ArrayList<Integer> currentFrame = currentProcess.frame;
+                int limit = (int) (currentProcess.duration / 0.1);
+                int accessPage = 0;
 
-                    for (int i = 0; i < limit; i++) {
-                        if (currentFrame.contains(accessPage)) {
-                            hits++;
+                for (int i = 0; i < limit; i++) {
+                    if (currentFrame.contains(accessPage)) {
+                        hits++;
+                    } else {
+                        faults++;
+
+                        if (currentFrame.size() < currentProcess.frameSize) {
+                            currentFrame.add(accessPage);
                         } else {
-                            faults++;
-
-                            if (currentFrame.size() < currentProcess.frameSize) {
-                                currentFrame.add(accessPage);
-                            } else {
-                                currentFrame.set(i % currentProcess.frameSize, accessPage);
-                            }
+                            currentFrame.set(i % currentProcess.frameSize, accessPage);
                         }
-
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        accessPage = currentProcess.locate(accessPage);
                     }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    accessPage = currentProcess.locate(accessPage);
                 }
             }
         }
@@ -89,48 +94,55 @@ public class PageReplacement {
         @Override
         public void run() {
             while (!queue.isEmpty()) {
-                Process p = queue.poll();
-                
-                //update memory
-                memory.put(Thread.currentThread(),p);
+                Process currentProcess = fetchProcess();
+
+                if (currentProcess == null) {
+                    break;
+                }
+
+                // update memory
+                memory.put(Thread.currentThread(), currentProcess);
                 
                 // get page references
-                Queue<Integer> references = new LinkedList<Integer>();
+                Queue<Integer> references = new LinkedList<>();
                 int cur_page = 0;
-                int loopTimes = (int) (p.duration / 0.1);
+                int loopTimes = (int) (currentProcess.duration / 0.1);
+                ArrayList<Integer> currentFrame = currentProcess.frame;
                 
                 for (int i = 0; i < loopTimes; i++){
-                    references.add(p.locate(cur_page));
+                    references.add(cur_page);
+                    cur_page = currentProcess.locate(cur_page);
                 }
 
                 // process execution
-                for (int i=0; i < loopTimes; i++){
+                for (int i = 0; i < loopTimes; i++){
                     // get the reference page number
                     int page = references.poll();
-                    if (!p.frame.contains(page)){
-                        // miss
+                    if (!currentFrame.contains(page)){
                         faults++;
-                        if (p.frame.size() < 4){
+                        if (currentFrame.size() < currentProcess.frameSize){
                             // page frames not full
-                            p.frame.add(page);
+                            currentFrame.add(page);
                         } else {
                             int maxIndex = -1;
                             int maxPage = -1;
+
                             // check every page in the frame
-                            for (int j = 0; j < p.frame.size(); j++){
-                                int framePage = p.frame.get(j);
+                            for (int framePage : currentFrame) {
                                 int index = Arrays.asList(references).indexOf(framePage);
-                                if (index == -1){
+
+                                if (index == -1) {
                                     // this page is not in the future page references
                                     maxPage = framePage;
                                     break;
                                 }
-                                if (index > maxIndex){
+
+                                if (index > maxIndex) {
                                     maxIndex = index;
                                     maxPage = framePage;
                                 }
                             }
-                            p.frame.set(p.frame.indexOf(maxPage), page);
+                            currentFrame.set(currentFrame.indexOf(maxPage), page);
                         }
                     } else {
                         hits++;
