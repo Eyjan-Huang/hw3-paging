@@ -5,10 +5,10 @@ import java.util.Random;
 
 public class Process {
     private Random rand;
-    private int id = 0;
-    private int size;
+    public int id = 0;
+    public int size;
     public int frameSize;
-    private long time;
+    public long time;
     public int duration;
     private ArrayList<Integer> pages;   // All possible pages on the disk
     public ArrayList<Integer> frame;   // Size = 4, the piece of memory

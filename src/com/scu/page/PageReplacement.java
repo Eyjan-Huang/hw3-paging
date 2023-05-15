@@ -26,6 +26,13 @@ public class PageReplacement {
                     name, hits, faults, queue
             );
         }
+
+        public String processRecord(Process process) {
+            return String.format(
+                "%d, Process id: %d, Exit, Page Size: %d, Service Duration: %d, Memory: ",
+                System.currentTimeMillis(), process.id, process.size, process.time
+            );
+        }
     }
 
     static class FIFO extends PageReplacementAlgorithm {
@@ -147,12 +154,12 @@ public class PageReplacement {
                     } else {
                         hits++;
                     }
-                }
 
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e){
-                    e.printStackTrace();
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -166,7 +173,51 @@ public class PageReplacement {
 
         @Override
         public void run() {
+            while(!queue.isEmpty()) {
+                Process currentProcess = fetchProcess();
 
+                if (currentProcess == null) {
+                    break;
+                }
+
+                // update memory
+                memory.put(Thread.currentThread(), currentProcess);
+
+                // process execution
+                int loopTimes = (int) (currentProcess.duration / 0.1);
+                int currentPage = 0;
+                ArrayList<Integer> currentFrame = currentProcess.frame;
+                Random rand = new Random();
+
+                for (int i = 0; i < loopTimes; i++) {
+                    if (currentFrame.contains(currentPage)) {
+                        hits++;
+                    } else {
+                        faults++;
+
+                        if (currentFrame.size() < currentProcess.frameSize) {
+                            // page frames are not full
+                            currentFrame.add(currentPage);
+                        } else {
+                            // Selects a page to be evicted at random
+                            currentFrame.set(rand.nextInt(currentProcess.frameSize), currentPage);
+                        }
+                    }
+
+                    // update current page
+                    currentPage = currentProcess.locate(currentPage);
+
+                    // wait for 100 milisecs
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                // Each time a process completes, print a record
+                // System.out.println(processRecord(currentProcess));
+            }
         }
     }
 }
