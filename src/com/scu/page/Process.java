@@ -8,6 +8,7 @@ public class Process {
     private Random rand;
     private int id = 0;
     private int size;
+    public int frameSize;
     private long time;
     public int duration;
     private ArrayList<Integer> pages;   // All possible pages on the disk
@@ -20,6 +21,7 @@ public class Process {
 
         this.id = id;
         this.size = sizePool[randIdx];
+        this.frameSize = 4;
         this.pages = new ArrayList<>();
         this.frame = new ArrayList<>();
         this.time = System.currentTimeMillis();
