@@ -26,6 +26,10 @@ public class Init {
         // Execute each algorithm for 1 min
         for(PageReplacementAlgorithm algorithm : algorithmsPool) {
             System.out.println(algorithm);
+            for(int i = 0; i<25; i++){
+                Thread processThread = new Thread(algorithm);
+                processThread.start();
+            }
         }
 
 
