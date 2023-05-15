@@ -5,7 +5,7 @@ import java.util.*;
 public class PageReplacement {
     static abstract class PageReplacementAlgorithm implements Runnable{
         String name;
-        int faults = 0, hits = 0;
+        int faults = 0, hits = 0, procNum = 0;
         final Queue<Process> queue;
         LinkedHashMap<Thread, Process> memory = new LinkedHashMap<>();
         final int SIZE = 25;
@@ -28,9 +28,21 @@ public class PageReplacement {
         }
 
         public String processRecord(Process process) {
+            StringBuilder memoryMap = new StringBuilder("<");
+            String empMem = ".";
+            memory.forEach((thread,proc) -> {
+                if (proc == null){
+                    memoryMap.append(empMem + ",");
+                } else {
+                    memoryMap.append(proc.id + ",");
+                }
+            });
+            memoryMap.deleteCharAt(memoryMap.length() - 1);
+            memoryMap.append(">");
+
             return String.format(
-                "%d, Process id: %d, Exit, Page Size: %d, Service Duration: %d, Memory: ",
-                System.currentTimeMillis(), process.id, process.size, process.time
+                "%d, Process id: %d, Exit, Page Size: %d, Service Duration: %d, \nMemory: %s\n",
+                System.currentTimeMillis(), process.id, process.size, process.duration, memoryMap.toString()
             );
         }
     }
@@ -50,6 +62,7 @@ public class PageReplacement {
                     break;
                 }
 
+                procNum++;
                 memory.put(Thread.currentThread(), currentProcess);
                 ArrayList<Integer> currentFrame = currentProcess.frame;
                 int limit = (int) (currentProcess.duration / 0.1);
@@ -75,6 +88,10 @@ public class PageReplacement {
                     }
                     accessPage = currentProcess.locate(accessPage);
                 }
+
+                // Each time a process completes, print a record
+                System.out.println(processRecord(currentProcess));
+                memory.put(Thread.currentThread(), null);
             }
         }
     }
@@ -94,6 +111,7 @@ public class PageReplacement {
                     break;
                 }
 
+                procNum++;
                 memory.put(Thread.currentThread(), currentProcess);
                 ArrayList<Integer> currentFrame = currentProcess.frame;
                 int limit = (int) (currentProcess.duration / 0.1);
@@ -127,6 +145,10 @@ public class PageReplacement {
                     }
                     accessPage = currentProcess.locate(accessPage);
                 }
+
+                // Each time a process completes, print a record
+                System.out.println(processRecord(currentProcess));
+                memory.put(Thread.currentThread(), null);
             }
         }
     }
@@ -147,6 +169,7 @@ public class PageReplacement {
                     break;
                 }
 
+                procNum++;
                 // update memory
                 memory.put(Thread.currentThread(), currentProcess);
                 
@@ -201,6 +224,10 @@ public class PageReplacement {
                         e.printStackTrace();
                     }
                 }
+
+                // Each time a process completes, print a record
+                System.out.println(processRecord(currentProcess));
+                memory.put(Thread.currentThread(), null);
             }
         }
     }
@@ -220,6 +247,7 @@ public class PageReplacement {
                     break;
                 }
 
+                procNum++;
                 // update memory
                 memory.put(Thread.currentThread(), currentProcess);
 
@@ -256,7 +284,8 @@ public class PageReplacement {
                 }
 
                 // Each time a process completes, print a record
-                // System.out.println(processRecord(currentProcess));
+                System.out.println(processRecord(currentProcess));
+                memory.put(Thread.currentThread(), null);
             }
         }
     }
