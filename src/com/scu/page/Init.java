@@ -39,7 +39,8 @@ public class Init {
                 e.printStackTrace();
             }
 
-            System.out.println(algorithm.name + "***" + algorithm.faults + "***" + algorithm.hits);
+            System.out.println(algorithm.name + "***" + algorithm.faults + "***" + 
+                                algorithm.hits + "***" + ((float)algorithm.hits/algorithm.faults) + '\n');
         }
 
 

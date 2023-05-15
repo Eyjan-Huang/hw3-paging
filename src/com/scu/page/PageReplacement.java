@@ -27,11 +27,11 @@ public class PageReplacement {
             );
         }
 
-        public String processRecord(Process process) {
+        public synchronized String processRecord(Process process) {
             StringBuilder memoryMap = new StringBuilder("<");
             String empMem = ".";
             memory.forEach((thread,proc) -> {
-                if (proc == null){
+                if (proc == null) {
                     memoryMap.append(empMem + ",");
                 } else {
                     memoryMap.append(proc.id + ",");
@@ -90,7 +90,7 @@ public class PageReplacement {
                 }
 
                 // Each time a process completes, print a record
-                System.out.println(processRecord(currentProcess));
+                // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
             }
         }
@@ -147,7 +147,7 @@ public class PageReplacement {
                 }
 
                 // Each time a process completes, print a record
-                System.out.println(processRecord(currentProcess));
+                // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
             }
         }
@@ -158,7 +158,6 @@ public class PageReplacement {
             super(queue);
             this.name = "Optimal";
         }
-
 
         @Override
         public void run() {
@@ -175,12 +174,21 @@ public class PageReplacement {
                 
                 // get page references
                 Queue<Integer> references = new LinkedList<>();
+                HashMap<Integer, Queue<Integer>> nextAccess = new HashMap<>();
                 int cur_page = 0;
                 int loopTimes = (int) (currentProcess.duration / 0.1);
                 ArrayList<Integer> currentFrame = currentProcess.frame;
                 
                 for (int i = 0; i < loopTimes; i++){
-                    references.add(cur_page);
+                    // nextAccess to store the indices of the pages in the reference queue
+                    if (nextAccess.containsKey(cur_page)) {
+                        nextAccess.get(cur_page).offer(i);
+                    } else {
+                        Queue<Integer> temp = new LinkedList<>();
+                        temp.offer(i);
+                        nextAccess.put(cur_page, temp);
+                    }
+                    references.offer(cur_page);
                     cur_page = currentProcess.locate(cur_page);
                 }
 
@@ -188,6 +196,7 @@ public class PageReplacement {
                 for (int i = 0; i < loopTimes; i++){
                     // get the reference page number
                     int page = references.poll();
+                    nextAccess.get(page).poll();
                     if (!currentFrame.contains(page)){
                         faults++;
                         if (currentFrame.size() < currentProcess.frameSize){
@@ -199,14 +208,14 @@ public class PageReplacement {
 
                             // check every page in the frame
                             for (int framePage : currentFrame) {
-                                int index = Arrays.asList(references).indexOf(framePage);
 
-                                if (index == -1) {
+                                if (nextAccess.get(framePage).peek() == null) {
                                     // this page is not in the future page references
                                     maxPage = framePage;
                                     break;
                                 }
 
+                                int index = nextAccess.get(framePage).peek();
                                 if (index > maxIndex) {
                                     maxIndex = index;
                                     maxPage = framePage;
@@ -226,7 +235,7 @@ public class PageReplacement {
                 }
 
                 // Each time a process completes, print a record
-                System.out.println(processRecord(currentProcess));
+                // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
             }
         }
@@ -284,7 +293,7 @@ public class PageReplacement {
                 }
 
                 // Each time a process completes, print a record
-                System.out.println(processRecord(currentProcess));
+                // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
             }
         }
