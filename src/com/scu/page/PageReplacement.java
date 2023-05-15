@@ -87,7 +87,47 @@ public class PageReplacement {
 
         @Override
         public void run() {
+            while (!queue.isEmpty()) {
+                Process currentProcess = fetchProcess();
 
+                if (currentProcess == null) {
+                    break;
+                }
+
+                memory.put(Thread.currentThread(), currentProcess);
+                ArrayList<Integer> currentFrame = currentProcess.frame;
+                int limit = (int) (currentProcess.duration / 0.1);
+                int accessPage = 0;
+                LRUCache<Integer, Integer> cache = new LRUCache<>(currentProcess.frameSize);
+                Map.Entry<Integer, Integer> eldestEntry;
+
+                for (int i = 0; i < limit; i++) {
+                    if (currentFrame.contains(accessPage)) {
+                        hits++;
+                        cache.get(accessPage);
+                    } else {
+                        faults++;
+
+                        if (currentFrame.size() < currentProcess.frameSize) {
+                            currentFrame.add(accessPage);
+                            int idx = currentFrame.indexOf(accessPage);
+                            cache.put(accessPage, idx);
+                        } else {
+                            eldestEntry = cache.entrySet().iterator().next();
+                            int targetIdx = eldestEntry.getValue();
+                            currentFrame.set(targetIdx, accessPage);
+                            cache.put(accessPage, targetIdx);
+                        }
+                    }
+
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    accessPage = currentProcess.locate(accessPage);
+                }
+            }
         }
     }
 
@@ -218,6 +258,20 @@ public class PageReplacement {
                 // Each time a process completes, print a record
                 // System.out.println(processRecord(currentProcess));
             }
+        }
+    }
+
+    static class LRUCache<K, V> extends LinkedHashMap<K, V> {
+        private final int capacity;
+
+        public LRUCache(int capacity) {
+            super(capacity, 0.75f, true);
+            this.capacity = capacity;
+        }
+
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
+            return super.size() > capacity;
         }
     }
 }
