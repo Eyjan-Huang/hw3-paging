@@ -33,7 +33,6 @@ public class Process {
     }
 
     public int locate(int idx) {
-        System.out.println("Current is idx: " + idx);
         int probability = rand.nextInt(10) + 1;
         int nextIdx = -1;
 
@@ -42,14 +41,11 @@ public class Process {
 
             while(nextIdx < 0 || nextIdx > size - 1) {
                 nextIdx = idx + nextPool[rand.nextInt(nextPool.length)];
-                System.out.println("70%" + nextIdx);
             }
         } else {
             if (idx == 0) {
-                System.out.println("30% and idx is 0");
                 return rand.nextInt(size - 2) + 2;
             } else if (idx == size - 1) {
-                System.out.println("30% and idx is size - 1");
                 return rand.nextInt(size - 2);
             } else {
                 ArrayList<Integer> candidateBuffer = new ArrayList<>();
@@ -60,7 +56,6 @@ public class Process {
                         candidateBuffer.add(i);
                     }
                 }
-                System.out.println("30% and idx is normal case");
                 return candidateBuffer.get(rand.nextInt(candidateBuffer.size()));
             }
         }

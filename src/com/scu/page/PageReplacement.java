@@ -6,7 +6,7 @@ public class PageReplacement {
     static abstract class PageReplacementAlgorithm implements Runnable{
         String name;
         int faults = 0, hits = 0;
-        Queue<Process> queue;
+        final Queue<Process> queue;
         LinkedHashMap<Thread, Process> memory = new LinkedHashMap<>();
         final int SIZE = 25;
 
@@ -30,7 +30,40 @@ public class PageReplacement {
 
         @Override
         public void run() {
+            while (!queue.isEmpty()) {
+                Process currentProcess;
+                synchronized (queue) {
+                    currentProcess = (! queue.isEmpty()) ? queue.poll() : null;
+                }
 
+                if (currentProcess != null) {
+                    memory.put(Thread.currentThread(), currentProcess);
+                    ArrayList<Integer> currentFrame = currentProcess.frame;
+                    int limit = (int) (currentProcess.duration / 0.1);
+                    int accessPage = 0;
+
+                    for (int i = 0; i < limit; i++) {
+                        if (currentFrame.contains(accessPage)) {
+                            hits++;
+                        } else {
+                            faults++;
+
+                            if (currentFrame.size() < currentProcess.frameSize) {
+                                currentFrame.add(accessPage);
+                            } else {
+                                currentFrame.set(i % currentProcess.frameSize, accessPage);
+                            }
+                        }
+
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        accessPage = currentProcess.locate(accessPage);
+                    }
+                }
+            }
         }
     }
 
