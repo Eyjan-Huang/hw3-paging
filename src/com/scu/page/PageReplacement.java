@@ -88,7 +88,61 @@ public class PageReplacement {
 
         @Override
         public void run() {
+            while (!queue.isEmpty()) {
+                Process p = queue.poll();
+                
+                //update memory
+                memory.put(Thread.currentThread(),p);
+                
+                // get page references
+                Queue<Integer> references = new LinkedList<Integer>();
+                int cur_page = 0;
+                int loopTimes = (int) (p.duration / 0.1);
+                
+                for (int i = 0; i < loopTimes; i++){
+                    references.add(p.locate(cur_page));
+                }
 
+                // process execution
+                for (int i=0; i < loopTimes; i++){
+                    // get the reference page number
+                    int page = references.poll();
+                    if (!p.frame.contains(page)){
+                        // miss
+                        faults++;
+                        if (p.frame.size() < 4){
+                            // page frames not full
+                            p.frame.add(page);
+                        } else {
+                            int maxIndex = -1;
+                            int maxPage = -1;
+                            // check every page in the frame
+                            for (int j = 0; j < p.frame.size(); j++){
+                                int framePage = p.frame.get(j);
+                                int index = Arrays.asList(references).indexOf(framePage);
+                                if (index == -1){
+                                    // this page is not in the future page references
+                                    maxPage = framePage;
+                                    break;
+                                }
+                                if (index > maxIndex){
+                                    maxIndex = index;
+                                    maxPage = framePage;
+                                }
+                            }
+                            p.frame.set(p.frame.indexOf(maxPage), page);
+                        }
+                    } else {
+                        hits++;
+                    }
+                }
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e){
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
