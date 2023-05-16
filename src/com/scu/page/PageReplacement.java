@@ -6,7 +6,7 @@ public class PageReplacement {
     static abstract class PageReplacementAlgorithm implements Runnable{
         String name;
         int faults = 0, hits = 0, procNum = 0;
-        final Queue<Process> queue;
+        public Queue<Process> queue;
         LinkedHashMap<Thread, Process> memory = new LinkedHashMap<>();
         final int SIZE = 25;
 
@@ -44,6 +44,13 @@ public class PageReplacement {
                 "%d, Process id: %d, Exit, Page Size: %d, Service Duration: %d, \nMemory: %s\n",
                 System.currentTimeMillis(), process.id, process.size, process.duration, memoryMap.toString()
             );
+        }
+
+        public void initialize(LinkedList<Process> queue) {
+            hits = 0;
+            faults = 0;
+            memory.clear();
+            this.queue = queue;
         }
     }
 
@@ -92,6 +99,7 @@ public class PageReplacement {
                 // Each time a process completes, print a record
                 // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
+                currentProcess.frame.clear();
             }
         }
     }
@@ -149,6 +157,7 @@ public class PageReplacement {
                 // Each time a process completes, print a record
                 // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
+                currentProcess.frame.clear();
             }
         }
     }
@@ -237,6 +246,7 @@ public class PageReplacement {
                 // Each time a process completes, print a record
                 // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
+                currentProcess.frame.clear();
             }
         }
     }
@@ -295,6 +305,7 @@ public class PageReplacement {
                 // Each time a process completes, print a record
                 // System.out.println(processRecord(currentProcess));
                 memory.put(Thread.currentThread(), null);
+                currentProcess.frame.clear();
             }
         }
     }
