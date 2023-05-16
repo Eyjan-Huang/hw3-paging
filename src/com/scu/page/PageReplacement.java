@@ -5,7 +5,9 @@ import java.util.*;
 public class PageReplacement {
     static abstract class PageReplacementAlgorithm implements Runnable{
         String name;
-        int faults = 0, hits = 0, procNum = 0;
+        int faults = 0, hits = 0, procNum = 0, referenceCount = 0;
+        boolean hitSign;
+        int evictedPage;
         public Queue<Process> queue;
         LinkedHashMap<Thread, Process> memory = new LinkedHashMap<>();
         final int SIZE = 25;
@@ -52,6 +54,19 @@ public class PageReplacement {
             memory.clear();
             this.queue = queue;
         }
+
+        public synchronized void referenceRecord(int id, int reference, boolean sig, int evicted){
+            if (sig) {
+                System.out.println("<" + System.currentTimeMillis() + ", procId: " + id + 
+                                    ", reference:" + reference + ", " +"Hit>");
+            } else if (evicted >= 0) {
+                System.out.println("<" + System.currentTimeMillis() + ", procId: " + id + 
+                                    ", reference:" + reference + ", " + "Miss" + ", evictedPage: "+ evicted + ">");
+            } else{
+                System.out.println("<" + System.currentTimeMillis() + ", procId: " + id + 
+                                    ", reference:" + reference + ", " + "Miss>");
+            }
+        }
     }
 
     static class FIFO extends PageReplacementAlgorithm {
@@ -78,12 +93,16 @@ public class PageReplacement {
                 for (int i = 0; i < limit; i++) {
                     if (currentFrame.contains(accessPage)) {
                         hits++;
+                        hitSign = true;
                     } else {
                         faults++;
+                        hitSign = false;
 
                         if (currentFrame.size() < currentProcess.frameSize) {
                             currentFrame.add(accessPage);
+                            evictedPage = -1;
                         } else {
+                            evictedPage = currentFrame.get(i % currentProcess.frameSize);
                             currentFrame.set(i % currentProcess.frameSize, accessPage);
                         }
                     }
@@ -92,6 +111,11 @@ public class PageReplacement {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+
+                    if (referenceCount > 0){
+                        referenceRecord(currentProcess.id, accessPage, hitSign, evictedPage);
+                        referenceCount--;
                     }
                     accessPage = currentProcess.locate(accessPage);
                 }
@@ -130,17 +154,21 @@ public class PageReplacement {
                 for (int i = 0; i < limit; i++) {
                     if (currentFrame.contains(accessPage)) {
                         hits++;
+                        hitSign = true;
                         cache.get(accessPage);
                     } else {
                         faults++;
+                        hitSign = false;
 
                         if (currentFrame.size() < currentProcess.frameSize) {
                             currentFrame.add(accessPage);
                             int idx = currentFrame.indexOf(accessPage);
                             cache.put(accessPage, idx);
+                            evictedPage = -1;
                         } else {
                             eldestEntry = cache.entrySet().iterator().next();
                             int targetIdx = eldestEntry.getValue();
+                            evictedPage = currentFrame.get(targetIdx);
                             currentFrame.set(targetIdx, accessPage);
                             cache.put(accessPage, targetIdx);
                         }
@@ -150,6 +178,11 @@ public class PageReplacement {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+
+                    if (referenceCount > 0){
+                        referenceRecord(currentProcess.id, accessPage, hitSign, evictedPage);
+                        referenceCount--;
                     }
                     accessPage = currentProcess.locate(accessPage);
                 }
@@ -208,9 +241,12 @@ public class PageReplacement {
                     nextAccess.get(page).poll();
                     if (!currentFrame.contains(page)){
                         faults++;
+                        hitSign = false;
+
                         if (currentFrame.size() < currentProcess.frameSize){
                             // page frames not full
                             currentFrame.add(page);
+                            evictedPage = -1;
                         } else {
                             int maxIndex = -1;
                             int maxPage = -1;
@@ -230,16 +266,23 @@ public class PageReplacement {
                                     maxPage = framePage;
                                 }
                             }
+                            evictedPage = currentFrame.get(currentFrame.indexOf(maxPage));
                             currentFrame.set(currentFrame.indexOf(maxPage), page);
                         }
                     } else {
                         hits++;
+                        hitSign = true;
                     }
 
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
+                    }
+
+                    if (referenceCount > 0){
+                        referenceRecord(currentProcess.id, page, hitSign, evictedPage);
+                        referenceCount--;
                     }
                 }
 
@@ -279,20 +322,22 @@ public class PageReplacement {
                 for (int i = 0; i < loopTimes; i++) {
                     if (currentFrame.contains(currentPage)) {
                         hits++;
+                        hitSign = true;
                     } else {
                         faults++;
+                        hitSign = false;
 
                         if (currentFrame.size() < currentProcess.frameSize) {
                             // page frames are not full
                             currentFrame.add(currentPage);
+                            evictedPage = -1;
                         } else {
                             // Selects a page to be evicted at random
-                            currentFrame.set(rand.nextInt(currentProcess.frameSize), currentPage);
+                            int randIdx = rand.nextInt(currentProcess.frameSize);
+                            evictedPage = currentFrame.get(randIdx);
+                            currentFrame.set(randIdx, currentPage);
                         }
                     }
-
-                    // update current page
-                    currentPage = currentProcess.locate(currentPage);
 
                     // wait for 100 milisecs
                     try {
@@ -300,6 +345,14 @@ public class PageReplacement {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
+
+                    if (referenceCount > 0){
+                        referenceRecord(currentProcess.id, currentPage, hitSign, evictedPage);
+                        referenceCount--;
+                    }
+
+                    // update current page
+                    currentPage = currentProcess.locate(currentPage);
                 }
 
                 // Each time a process completes, print a record
